@@ -1,50 +1,45 @@
 name: CI
 
-on:
-  push:
-    branches: main
-  pull_request: {}
+on: [push, pull_request]
 
 permissions:
   contents: read
 
 jobs:
   integration:
-    runs-on: ${{ matrix.os }} 
+    runs-on: ${{ matrix.os }}
     defaults:
       run:
-        shell: sh -l {0}
+        shell: bash -l {0}
+        
     strategy:
       fail-fast: true
       matrix:
-        os: ubuntu-latest
-        compilier: [gcc, clang]
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
     steps:
-      - name: Checkout repository
+      - name: Setup
         uses: actions/checkout@v3
-      - name: clang-format
-        uses: RafikFarhad/clang-format-github-action@v3
+        uses: actions-rs/toolchain@v1
+          with:
+            profile: minimal
+            toolchain: nightly
+            components: rustfmt, clippy
+            override: true
+
+      - name: Test
+        uses: actions-rs/cargo@v1
         with:
-          sources: "src/**/*.h,src/**/*.c,test/**/*.c,src/**/*.hpp,src/**/*.cpp,test/**/*.cpp"
-      - name: clang-tidy
-        uses: asarium/clang-tidy-action@v1
-      - name: uncrustify
-        uses: coleaeason/actions-uncrustify@v1
-      - name: cppcheck
-        uses: deep5050/cppcheck-action@main
-      - name: include-what-you-use
-        uses: EmilGedda/include-what-you-use-action@v1
-      - name: Install compiler
-        id: install_compiler
-        uses: rlalik/setup-cpp-compiler@master
+          command: test
+
+      - name: Lint
+        uses: actions-rs/cargo@v1
         with:
-          compiler: ${{ matrix.compilier }}
-      - name: Setup CMake
-        uses: jwlawson/actions-setup-cmake@v1.13
-      - name: Run CMake
-        uses: johelegp/modern-cmake-buildsystem@v1
-        env:
-          CC: ${{ steps.install_compiler.outputs.cc }}
-          CXX: ${{ steps.install_compiler.outputs.cxx }}
+          command: clippy
+          args: -- -D warnings
+
+      - name: Format
+        uses: actions-rs/cargo@v1
         with:
-          generate-options: "--preset=test"
+          command: fmt
+          args: --all -- --check
