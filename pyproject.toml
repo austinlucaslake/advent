@@ -1,0 +1,28 @@
+[project]
+name = "advent-2021"
+version = "0.1.0"
+authors = [
+  { name="Austin Lake", email="53884490+austinlucaslake@users.noreply.github.com" },
+]
+description = "Advent of Code 2021."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache License 2.0",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+]
+
+[project.urls]
+Homepage = "https://github.com/austinlucaslake/advent/tree/2021"
+
+[project.optional-dependencies]
+dev = ["ruff", "pylint", "pytest", "pipreqs", "pip-tools", "pre-commit-hooks"]
+
+[tool.ruff]
+select = [
+  "ALL",
+]
